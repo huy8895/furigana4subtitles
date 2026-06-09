@@ -21,11 +21,10 @@ ENV LANG ja_JP.UTF-8
 ENV LANGUAGE ja_JP:ja
 ENV LC_ALL ja_JP.UTF-8
 
-# Tạo thư mục font và tải font OsakaMono.ttf từ nguồn lưu trữ
-# Font này là font Monospace tiếng Nhật giúp FFmpeg và libass render phụ đề thẳng hàng
-RUN mkdir -p /usr/share/fonts/truetype/osaka && \
-    curl -o /usr/share/fonts/truetype/osaka/OsakaMono.ttf -L "https://github.com/gilbo/rawgui/raw/master/assets/OsakaMono.ttf" && \
-    fc-cache -f -v
+# Tạo thư mục font và sao chép font OsakaMono.ttf từ thư mục local
+RUN mkdir -p /usr/share/fonts/truetype/osaka
+COPY fonts/OsakaMono.ttf /usr/share/fonts/truetype/osaka/OsakaMono.ttf
+RUN fc-cache -f -v
 
 WORKDIR /app
 
