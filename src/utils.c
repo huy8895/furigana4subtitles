@@ -19,14 +19,14 @@
 
 static struct font_config default_cfg = {
 	.font_name = "Osaka-Mono",
-	.main_size = 52,
-	.furigana_size = 26,
+	.main_size = 62,
+	.furigana_size = 31,
 	.screen_w = 1920,
 	.screen_h = 1080,
-	.baseline_y = 980,
-	.furigana_offset = 48,
-	.char_width = 52.0f,
-	.line_spacing = 104
+	.baseline_y = 800,
+	.furigana_offset = 58,
+	.char_width = 62.0f,
+	.line_spacing = 124
 };
 
 struct font_config *get_default_config(void)
@@ -39,7 +39,7 @@ struct font_config *create_scaled_config(int main_size)
 	static struct font_config scaled_cfg;
 	const int base_size = 52;
 	float scale = (float)main_size / base_size;
-	int fixed_margin = 50;
+	int fixed_margin = 230;
 
 	scaled_cfg.font_name = default_cfg.font_name;
 	scaled_cfg.main_size = main_size;
