@@ -30,11 +30,11 @@ static void write_ass_styles(FILE *f, struct font_config *cfg)
 		   "BackColour,Bold,Italic,BorderStyle,Outline,Shadow,Alignment,"
 		   "MarginL,MarginR,MarginV,Effect,Encoding\n");
 
-	fprintf(f, "Style: Main,%s,%d,&H00FFFFFF,&H00000000,&H00000000,"
+	fprintf(f, "Style: Main,%s,%d,&H00000000,&H00FFFFFF,&H00000000,"
 		   "0,0,1,2,0,5,10,10,10,\n",
 		cfg->font_name, cfg->main_size);
 
-	fprintf(f, "Style: Furi,%s,%d,&H00FFFFFF,&H00000000,&H00000000,"
+	fprintf(f, "Style: Furi,%s,%d,&H00000000,&H00FFFFFF,&H00000000,"
 		   "0,0,1,1,0,5,10,10,10,\n\n",
 		cfg->font_name, cfg->furigana_size);
 }
