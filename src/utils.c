@@ -18,7 +18,7 @@
 #include "ass.h"
 
 static struct font_config default_cfg = {
-	.font_name = "MS Gothic",
+	.font_name = "Rounded Mplus 1c",
 	.main_size = 52,
 	.furigana_size = 26,
 	.screen_w = 1920,

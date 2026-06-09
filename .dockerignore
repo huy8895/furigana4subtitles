@@ -1,0 +1,9 @@
+.git
+.gitignore
+obj/
+furigana4subtitles
+furigana4subtitles-cli
+*.ass
+*.png
+Dockerfile
+.dockerignore
