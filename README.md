@@ -1,119 +1,132 @@
 # Furigana4Subtitles
 
-A free & open-source tool for Japanese learners who watch anime with Japanese subtitles.
+Một công cụ mã nguồn mở hữu ích dành cho người học tiếng Nhật khi xem anime/phim có phụ đề tiếng Nhật.
 
-**Furigana4Subtitles** automatically converts .srt subtitles into .ass format, with hiragana readings (ふりがな) displayed above kanji.
+**Furigana4Subtitles** tự động chuyển đổi phụ đề định dạng `.srt` sang định dạng `.ass` với cách đọc Hiragana (ふりがな) được hiển thị căn chỉnh ngay trên đầu chữ Kanji tương ứng.
 
-It works seamlessly with **VLC** (uses a rendering technique compatible with VLC, unlike ruby annotations).
+Dự án hiện tại hỗ trợ cả việc chạy biên dịch cục bộ (Native C) và chạy hoàn toàn trên container thông qua **Docker** (tích hợp sẵn FFmpeg để **burn-in** phụ đề trực tiếp vào video).
 
 ![Alt text](furigana4subtitles.png)
 
-## Prerequisites
-### Video tutorial
-If you prefer a video format, [you can follow all the steps on YouTube.](https://youtu.be/DEWwYSAeoWE).
+---
 
-### Windows
-For Windows, please install [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) and follow GNU/Linux installation steps. 
+## 🌟 Các tính năng nổi bật mới nhất
 
-Make sure you have installed WSL version 2.
+* **Sử dụng Docker tiện lợi:** Chạy trực tiếp trên mọi nền tảng (macOS, Windows, Linux) mà không cần cài đặt các thư viện C phức tạp (như MeCab) trên máy chủ.
+* **Tự động Burn-in (Gắn cứng phụ đề):** Tích hợp sẵn công cụ **FFmpeg** bên trong Docker để tự động chuyển đổi và gắn cứng phụ đề Furigana trực tiếp vào video của bạn.
+* **Căn chỉnh hoàn hảo trên macOS:** Sử dụng font đơn cách mặc định **`Osaka-Mono`** giúp khắc phục hoàn toàn lỗi lệch chữ Furigana (do sai số tích lũy của font tỷ lệ).
+* **Màu sắc hiển thị tối ưu:** Màu chữ phụ đề được thiết lập là **Đen** và viền **Trắng** giúp hiển thị rõ ràng và nổi bật trên mọi cảnh phim.
+* **Kích thước chữ lớn & cân đối hơn:** Tăng 20% kích thước chữ (chữ chính 62px, furigana 31px) và dịch chuyển vị trí phụ đề lên trên (baseline Y = 800) giúp dễ đọc hơn.
+* **GitHub Actions CI/CD:** Tự động build Docker image hỗ trợ Multi-platform (`linux/amd64` và `linux/arm64`) đẩy lên Docker Hub khi cập nhật code.
 
-Once you have installed WSL2 with a GNU/Linux distribution (Ubuntu is recommended), run all of the following steps in the WSL2 terminal.
+---
 
-### macOS
-I don't have a Mac so don't hesitate to contribute to the project.
+## 🐳 Hướng dẫn sử dụng với Docker (Khuyên dùng)
 
-### GNU/Linux
-
+### 1. Chuẩn bị Docker Image
+Bạn có thể tự build image cục bộ từ mã nguồn:
 ```bash
-sudo apt update
-sudo apt install build-essential git mecab libmecab-dev mecab-ipadic-utf8
+docker build -t furigana4subtitles .
+```
+Hoặc tải trực tiếp image đã được build sẵn từ Docker Hub:
+```bash
+docker pull huy8895/furigana4subtitles:latest
 ```
 
-## Clone the project
+### 2. Các chế độ chạy cụ thể
+
+Do Docker chạy trong môi trường cô lập, bạn cần liên kết (mount) thư mục chứa video/phụ đề vào thư mục `/data` của container.
+
+#### Chế độ 1: Chỉ tạo file phụ đề `.ass` (không ghép vào video)
+* **macOS / Linux / Windows PowerShell:**
+  ```bash
+  docker run --rm -v "$(pwd)":/data furigana4subtitles /data/subtitle.srt
+  ```
+* **Windows CMD:**
+  ```cmd
+  docker run --rm -v "%cd%":/data furigana4subtitles /data/subtitle.srt
+  ```
+*(Kết quả file `subtitle.ass` sẽ được lưu cùng thư mục với file `.srt` gốc).*
+
+#### Chế độ 2: Tạo phụ đề và tự động Burn-in (Gắn cứng) vào video
+* **macOS / Linux / Windows PowerShell:**
+  ```bash
+  docker run --rm -v "$(pwd)":/data furigana4subtitles /data/subtitle.srt /data/video.mp4
+  ```
+* **Windows CMD:**
+  ```cmd
+  docker run --rm -v "%cd%":/data furigana4subtitles /data/subtitle.srt /data/video.mp4
+  ```
+*(Kết quả file video hardsub `video_furigana.mp4` sẽ được tạo ra tại thư mục hiện tại của bạn).*
+
+#### Chế độ 3: Chỉ định rõ tên file video đầu ra mong muốn
 ```bash
-git clone https://github.com/remisimaer/furigana4subtitles.git
-cd furigana4subtitles/
+docker run --rm -v "$(pwd)":/data furigana4subtitles /data/subtitle.srt /data/video.mp4 /data/output_hardsub.mp4
 ```
 
-The following steps should be executed inside the furigana4subtitles folder.
+> ⚠️ **Lưu ý quan trọng khi dùng Docker:** Cả file phụ đề `.srt` và file video `.mp4` đầu vào phải nằm trong cùng thư mục (hoặc thư mục con) nơi bạn chạy lệnh Terminal để Docker có thể ánh xạ đúng dữ liệu.
 
-## Build
+---
 
+## 🛠️ Hướng dẫn cài đặt & Biên dịch cục bộ (Không dùng Docker)
+
+### Yêu cầu hệ thống
+* **macOS:** Cài đặt font `Osaka-Mono` từ Font Book của hệ thống.
+* **GNU/Linux / Windows WSL2:**
+  ```bash
+  sudo apt update
+  sudo apt install build-essential git mecab libmecab-dev mecab-ipadic-utf8
+  ```
+
+### Biên dịch mã nguồn
 ```bash
 make
 ```
+Lệnh này sẽ tạo ra 2 chương trình thực thi cục bộ:
+* `furigana4subtitles` : Bản chạy dòng lệnh truyền tham số trực tiếp.
+* `furigana4subtitles-cli` : Bản chạy giao diện menu tương tác trên Terminal.
 
-This produces two executables:
-- `furigana4subtitles` : command-line version
-- `furigana4subtitles-cli` : interactive menu version
+### Sử dụng bản cục bộ
+* **Chạy bản Command-line:**
+  ```bash
+  ./furigana4subtitles subtitle.srt
+  # Hoặc quét cả thư mục
+  ./furigana4subtitles ./subfolder/
+  ```
+* **Chạy bản tương tác:**
+  ```bash
+  ./furigana4subtitles-cli
+  ```
 
-Clean build artifacts:
-```bash
-make clean
-```
+---
 
-## Usage
-
-### Command-line version
-
-```bash
-./furigana4subtitles <files or folders...>
-```
-
-> **Note:** Use quotes around paths containing spaces or special characters.
-
-| Action | Command |
-|--------|---------|
-| Single file | `./furigana4subtitles subtitle.srt` |
-| Multiple files | `./furigana4subtitles ep01.srt ep02.srt ep03.srt` |
-| With spaces | `./furigana4subtitles "my subtitle.srt"` |
-| Folder (recursive) | `./furigana4subtitles ./subs/` |
-| Mix | `./furigana4subtitles ./folder/ "special.srt"` |
-
-### Interactive version
-
-```bash
-./furigana4subtitles-cli
-```
-
-**Features:**
-- Convert subtitles .srt files and/or subtitles .srt contained in folders
-- Adjustable font size (16-120px) with proportional furigana scaling
-- Press `q` at any step to go back
-
-## Output
-
-Generated `.ass` files are placed alongside the input files:
-```
-/path/to/subtitle.srt → /path/to/subtitle.ass
-```
-
-## Project Structure
+## 📂 Cấu trúc dự án
 
 ```
-include/                # Headers
+include/                # File tiêu đề (.h)
 src/
-  ├── utils.c           # File operations, config
-  ├── srt.c             # SRT parser
-  ├── ass.c             # ASS generator
-  ├── mecab_helpers.c   # MeCab integration, furigana extraction
-  └── cli.c             # Interactive CLI logic
-main.c                  # Command-line entry point
-main_cli.c              # Interactive entry point
-obj/                    # Compiled object files (not committed)
+  ├── utils.c           # Xử lý tệp tin, cấu hình font
+  ├── srt.c             # Bộ phân tích phụ đề SRT
+  ├── ass.c             # Bộ tạo phụ đề định dạng ASS
+  ├── mecab_helpers.c   # Tích hợp MeCab và tính toán vị trí Furigana
+  └── cli.c             # Xử lý giao diện CLI tương tác
+fonts/
+  └── OsakaMono.ttf     # File font monospace dùng cho Docker build
+.github/workflows/
+  └── docker-publish.yml # Cấu hình tự động build & push Docker Hub
+Dockerfile              # Cấu hình đóng gói container
+entrypoint.sh           # Script điều phối chính cho Docker
+main.c                  # Điểm khởi chạy Command-line
+main_cli.c              # Điểm khởi chạy Interactive CLI
+Makefile                # Cấu hình biên dịch mã nguồn C
 ```
 
-## Roadmap
+---
 
-If the project becomes popular:
+## 📝 Bản quyền & Giấy phép
 
-- A GUI version will be developed for Windows, GNU/Linux, and macOS. Raylib is a candidate, but suggestions for other lightweight, cross-platform solutions are welcome.
-- A one-click installer will be developed for Windows, GNU/Linux, and macOS.
+Dự án được phân phối dưới giấy phép [GNU General Public License v3.0 hoặc muộn hơn](LICENSE).
 
-## License
+## ✍️ Tác giả gốc
 
-[GNU General Public License v3.0 or later](LICENSE)
-
-## Author
-
-Rémi SIMAER : <rsimaer@gmail.com>
+Rémi SIMAER - <rsimaer@gmail.com>
